@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Step 2"
+            android:layout_gravity="center"
+            android:background="@color/colorAccent"
+            android:textColor="@android:color/white"
+            android:padding="64dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
+
+    <Button
+            android:id="@+id/bt_step_2_previous"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="64dp"
+            android:text="Previous"
+            android:textAllCaps="false"
+            android:layout_gravity="left|bottom"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:background="@color/colorPrimary"/>
+
+    <Button
+            android:id="@+id/bt_step_2_complete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="64dp"
+            android:text="Complete"
+            android:textAllCaps="false"
+            android:layout_gravity="right|bottom"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:background="@color/colorPrimary"/>
+
+</FrameLayout>

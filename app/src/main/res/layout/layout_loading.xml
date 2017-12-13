@@ -4,8 +4,45 @@
              android:layout_height="match_parent">
 
     <ProgressBar
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
         android:layout_gravity="center"/>
+
+
+    <Button
+            android:id="@+id/bt_load_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="32dp"
+            android:text="Error"
+            android:layout_gravity="bottom|left"
+            android:textSize="16sp"
+            android:textAllCaps="false"
+            android:background="@android:color/holo_red_light"
+            android:textColor="@android:color/white"/>
+
+    <Button
+            android:id="@+id/bt_load_stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="32dp"
+            android:text="Stop"
+            android:layout_gravity="bottom|center_horizontal"
+            android:textSize="16sp"
+            android:textAllCaps="false"
+            android:background="@color/colorAccent"
+            android:textColor="@android:color/white"/>
+
+    <Button
+            android:id="@+id/bt_load_complete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="32dp"
+            android:text="Complete"
+            android:layout_gravity="bottom|right"
+            android:textSize="16sp"
+            android:textAllCaps="false"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"/>
 
 </FrameLayout>

@@ -1,32 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:background="@android:color/holo_red_light">
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <TextView
+             android:layout_height="match_parent">
+    <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="内容加载失败"
-            android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="@android:color/black"/>
+            android:text="Load Error"
+            android:layout_gravity="center"
+            android:textColor="@color/colorAccent"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
 
-        <!--响应重试接口需要指定id-->
-        <Button
+    <Button
             android:id="@id/sl_error_retry"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="重试"
-            android:textColor="@android:color/black"/>
-
-    </LinearLayout>
-
+            android:layout_margin="32dp"
+            android:text="Retry"
+            android:layout_gravity="center_horizontal|bottom"
+            android:textSize="16sp"
+            android:textAllCaps="false"
+            android:background="@android:color/holo_red_light"
+            android:textColor="@android:color/white"/>
 </FrameLayout>

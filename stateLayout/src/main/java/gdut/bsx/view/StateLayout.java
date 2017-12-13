@@ -168,7 +168,7 @@ public class StateLayout extends FrameLayout {
      * @param state 状态
      * @param layoutId 布局 id
      */
-    public void addItemLayout(int state, @LayoutRes int layoutId){
+    private void addItemLayout(int state, @LayoutRes int layoutId){
 
         ItemView itemView = new ItemView(state, layoutId);
         mSavedItemViews.add(itemView);
@@ -178,6 +178,16 @@ public class StateLayout extends FrameLayout {
         addView(itemViewStub);
         stateLayoutItems.append(state, itemViewStub);
     }
+
+    /**
+     * 添加自定义状态布局
+     * @param state 状态
+     * @param layoutId 布局 id
+     */
+    public void addCustomItemLayout(int state, @LayoutRes int layoutId){
+        addItemLayout(state, layoutId);
+    }
+
 
     @Override
     protected void onFinishInflate() {
@@ -212,7 +222,7 @@ public class StateLayout extends FrameLayout {
     public void changeState(int state){
 
         if (mCurState == state) {
-            Log.d(TAG, "current state already is " + state);
+            Log.d(TAG, "changeState() miss, current state already is " + state);
             return;
         }
 
@@ -221,7 +231,7 @@ public class StateLayout extends FrameLayout {
         // 如果已经子布局加载到当前的视图中
         View itemView = mCurrentViewItems.get(state);
         if (itemView != null) {
-            showItemView(itemView);
+            showItemView(state, itemView);
             return;
         }
 
@@ -244,7 +254,7 @@ public class StateLayout extends FrameLayout {
                 }
 
                 mCurrentViewItems.append(state, itemView);
-                showItemView(itemView);
+                showItemView(state, itemView);
             }
         } else {
             // 查找恢复数据中是否包含该状态视图
@@ -255,11 +265,8 @@ public class StateLayout extends FrameLayout {
                     return;
                 }
             }
-
             Log.e(TAG, "StateLayout change to state " + state + ", but can't match the correct layout.");
         }
-
-        mCurState = state;
     }
 
     private void initErrorListener(View itemView) {
@@ -311,10 +318,18 @@ public class StateLayout extends FrameLayout {
     }
 
     public void showContent(){
-        changeState(STATE_CONTENT);
+
+        if (mCurState == STATE_CONTENT) {
+            Log.d(TAG, "showContent() miss, current layout already is ContentLayout");
+            return;
+        }
+
+        hideAllItemViews();
+
+        showItemView(STATE_CONTENT, mContentView);
     }
 
-    private void showItemView(View itemView) {
+    private void showItemView(int state, View itemView) {
         if (itemView != null) {
             if (mEnableContentAnim) {
                 AlphaAnimation animation = new AlphaAnimation(0f, 1.0f);
@@ -322,8 +337,9 @@ public class StateLayout extends FrameLayout {
                 itemView.startAnimation(animation);
             }
             itemView.setVisibility(View.VISIBLE);
+            mCurState = state;
         } else {
-            Log.e(TAG, "StateLayout showItemView view is empty.");
+            Log.e(TAG, "StateLayout showItemView view is null.");
         }
     }
 
@@ -370,6 +386,10 @@ public class StateLayout extends FrameLayout {
      * 隐藏所有子布局
      */
     protected void hideAllItemViews() {
+        if (mContentView != null && mContentView.getVisibility() == VISIBLE) {
+            mContentView.setVisibility(GONE);
+        }
+
         for (int index = 0; index < mCurrentViewItems.size(); index++) {
             View view = mCurrentViewItems.valueAt(index);
             view.setVisibility(GONE);
