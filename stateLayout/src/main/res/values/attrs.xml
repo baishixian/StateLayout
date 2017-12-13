@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="StateLayout">
+        <attr name="loadingLayoutResId" format="reference"/>
+        <attr name="emptyContentLayoutResId" format="reference"/>
+        <attr name="errorLayoutResId" format="reference"/>
+        <attr name="enableAnim" format="boolean"/>
+    </declare-styleable>
+</resources>
