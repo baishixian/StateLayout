@@ -135,15 +135,3 @@ bintray {
     }
 }
 
-apply plugin: 'maven'
-
-// 发布包到本地仓库
-uploadArchives {
-    repositories.mavenDeployer {
-        repository(url: LOCAL_REPO_URL)
-        pom.groupId = PROJ_GROUP
-        pom.artifactId = PROJ_ARTIFACTID
-        pom.version = PROJ_VERSION
-    }
-}
-
