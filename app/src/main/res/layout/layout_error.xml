@@ -10,6 +10,7 @@
             android:textColor="@color/colorAccent"
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
 
+   <!-- 指定布局中的某个控件作为点击触发重试的载体 -->
     <Button
             android:id="@id/sl_error_retry"
             android:layout_width="wrap_content"

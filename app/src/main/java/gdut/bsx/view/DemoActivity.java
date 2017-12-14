@@ -66,7 +66,7 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
 
         // add stateLayout item that will be lazy inflate
         // 注意：由于状态 STATE_STEP_2 是使用 addLazyInflateStateLayout 添加的，其布局加载是在 changeState(STATE_STEP_2) 时进行
-        // 此时还不能操作状态 STATE_STEP_2 布局的子控件
+        // 调用该方法后还不能立即操作状态 STATE_STEP_2 布局的子控件
         stateLayout.addLazyInflateStateLayout(STATE_STEP_2, R.layout.layout_custom_step_2);
 
     }
@@ -116,7 +116,7 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
         Log.d(TAG, "showStep2Layout");
         stateLayout.changeState(STATE_STEP_2);
         // 由于状态 STATE_STEP_2 是使用 addLazyInflateStateLayout 添加的，调用 changeState 切换到对应状态后才开始加载布局
-        // 此时可以操作该布局的子控件
+        // 切换完后，此时才可以操作该布局的子控件
         findViewById(R.id.bt_step_2_previous).setOnClickListener(this);
         findViewById(R.id.bt_step_2_complete).setOnClickListener(this);
     }
