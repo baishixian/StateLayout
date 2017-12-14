@@ -1,6 +1,8 @@
 # StateLayout
  StateLayout supports different states to match different layouts for Android.
 
+![Sample](https://github.com/baishixian/StateLayout/blob/master/Sample.gif)
+
 ## Add dependencies
 
 **Project build.gradle**
