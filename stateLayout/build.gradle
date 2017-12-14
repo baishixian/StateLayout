@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 27
-        versionCode 2
-        versionName "1.0.1"
+        versionCode 3
+        versionName "1.1.0"
     }
 
     buildTypes {
@@ -30,6 +30,8 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.0.2'
 }
 
+// type command in the Terminal: ./gradlew build bintrayUpload
+
 allprojects {
     tasks.withType(Javadoc) {//兼容中文字符
         options {
@@ -41,7 +43,7 @@ allprojects {
 }
 
 def lib_name = "StateLayout"
-version = "1.0.1"
+version = "1.1.0"
 group = "gdut.bsx"
 def siteUrl = 'https://github.com/baishixian/StateLayout'
 def gitUrl = 'https://github.com/baishixian/StateLayout.git'

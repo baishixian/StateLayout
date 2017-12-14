@@ -36,6 +36,31 @@ public class StateLayout extends FrameLayout {
     static final String TAG = "StateLayout";
 
     /**
+     * OnErrorRetryListener, clickable view id is sl_error_retry.
+     * 匹配可以点击的 view id 是 sl_error_retry
+     */
+    public interface OnErrorRetryListener {
+        /**
+         * Error retry clicked.
+         * 错误时点击重试
+         */
+        void onErrorRetry();
+    }
+
+    /**
+     * OnEmptyContentRetryListener, clickable view id is sl_empty_content_retry.
+     * 匹配可以点击的 view id 是 sl_empty_content_retry
+     */
+    public interface OnEmptyContentRetryListener {
+        /**
+         * Empty content retry clicked.
+         * 内容为空时点击重试
+         */
+        void onEmptyContentRetry();
+    }
+
+
+    /**
      * LOADING_STATE
      */
     public static final int STATE_LOADING = 8602;
@@ -46,12 +71,12 @@ public class StateLayout extends FrameLayout {
     public static final int STATE_EMPTY_CONTENT = 8603;
 
     /**
-     * ERROR
+     * ERROR_STATE
      */
     public static final int STATE_ERROR = 8604;
 
     /**
-     * 正常显示
+     * CONTENT_STATE
      */
     public static final int STATE_CONTENT = 8605;
 
@@ -71,16 +96,19 @@ public class StateLayout extends FrameLayout {
     protected int mErrorLayoutId = -1;
 
     /**
+     * Lazy inflate item layout, cache ViewStub.
      * 懒加载子布局，需要时再进行 inflate
      */
-    private SparseArray<ViewStub> stateLayoutItems = new SparseArray<>();
+    private SparseArray<ViewStub> mStateLayoutStubItems = new SparseArray<>();
 
     /**
+     * Cache already loaded layout.
      * 记录已经加载过的子布局
      */
     private SparseArray<View> mCurrentViewItems = new SparseArray<>();
 
     /**
+     *
      * 用于恢复布局内容时使用
       */
     private List<ItemView> mSavedItemViews = new ArrayList<>();
@@ -110,6 +138,154 @@ public class StateLayout extends FrameLayout {
      * 内容视图（置于该自定义布局标签内的子视图）
      */
     protected View mContentView;
+
+    /**
+     * 添加懒加载的状态布局，会先缓存布局存根但并不立即初始化，只有切换到特定的状态时才初始化其对应布局
+     * 注意：如果使用该方法添加状态布局，需要在调用切换状态方法 changeState(int state) 后才能使用布局内的控件
+     * @param state 状态
+     * @param layoutId 布局 id
+     */
+    public void addLazyInflateStateLayout(int state, @LayoutRes int layoutId){
+        ItemView itemView = new ItemView(state, layoutId);
+        mSavedItemViews.add(itemView);
+
+        ViewStub itemViewStub = new ViewStub(getContext());
+        itemViewStub.setLayoutResource(layoutId);
+        addView(itemViewStub);
+        mStateLayoutStubItems.append(state, itemViewStub);
+    }
+
+    /**
+     * 添加状态布局并立即初始化
+     */
+    public void addItemLayout(int state, int layoutId){
+
+        addLazyInflateStateLayout(state, layoutId);
+        ViewStub itemViewStub = mStateLayoutStubItems.get(state);
+
+        // 当 ViewStub 被 inflate 后，getParent 返回值是 null
+        if (itemViewStub != null && itemViewStub.getParent() != null) {
+            View itemLayout = itemViewStub.inflate();
+            mCurrentViewItems.append(state, itemLayout);
+            itemLayout.setVisibility(GONE);
+
+            switch (state) {
+                case STATE_ERROR :
+                    initErrorListener(itemLayout);
+                    break;
+                case STATE_EMPTY_CONTENT :
+                    initEmptyContentListener(itemLayout);
+                    break;
+                default:break;
+            }
+        } else {
+            Log.d(TAG, "addItemLayout state is "  + state + ", this item view already inflate.");
+        }
+    }
+
+    /**
+     * change to empty content state.
+     */
+    public void showEmptyContent(){
+        changeState(STATE_EMPTY_CONTENT);
+    }
+
+    /**
+     * change to error state.
+     */
+    public void showError(){
+        changeState(STATE_ERROR);
+    }
+
+    /**
+     * change to empty content state.
+     */
+    public void showLoading(){
+        changeState(STATE_LOADING);
+    }
+
+    /**
+     * show content
+     * 展示 xml 布局文件中定义在该布局标签中的视图内容
+     */
+    public void showContent(){
+        changeState(STATE_CONTENT);
+    }
+
+    /**
+     * change state
+     * 改变状态
+     * @param state
+     */
+    public void changeState(int state){
+
+        if (mCurState == state) {
+            Log.d(TAG, "changeState() miss, current state already is " + state);
+            return;
+        }
+
+        hideAllItemViews();
+
+        // 如果已经子布局加载到当前的视图中
+        View itemView = mCurrentViewItems.get(state);
+        if (itemView != null) {
+            showItemView(state, itemView);
+            return;
+        }
+
+        // 获取缓存的 ViewStub 对象进行布局懒加载，实现只在需要时才加载布局
+        ViewStub itemViewStub = mStateLayoutStubItems.get(state);
+        if(itemViewStub != null) {
+            // 当 ViewStub 被 inflate 后，getParent 返回值是 null
+            // 注意 ViewStub 只能被 inflate 一次（setVisibility 有同样效果），完成 inflate 后 ViewStub 会被移除，功成身退
+            if (itemViewStub.getParent() != null) {
+                itemView = itemViewStub.inflate();
+                mCurrentViewItems.append(state, itemView);
+                showItemView(state, itemView);
+            }
+        } else {
+            // 查找恢复数据中是否包含该状态视图
+            for (ItemView saveItemView : mSavedItemViews) {
+                if (saveItemView != null && state == saveItemView.getState()) {
+                    addItemLayout(state, saveItemView.getLayoutId());
+                    changeState(state);
+                    return;
+                }
+            }
+            Log.e(TAG, "StateLayout change to state " + state + ", but can't match the correct layout.");
+        }
+    }
+
+    /**
+     * 获取当前状态
+     */
+    public int getCurrentState() {
+        return mCurState;
+    }
+
+    /**
+     * 是否开启布局切换动画
+     */
+    public void enableAnim(boolean enable) {
+        this.mEnableContentAnim = enable;
+    }
+
+    /**
+     * 设置错误重试监听
+     * @param listener 重试监听
+     */
+    public void setOnErrorRetryListener(OnErrorRetryListener listener) {
+        this.mErrorRetryListener = listener;
+    }
+
+    /**
+     * 设置空内容重试监听
+     * @param listener 重试监听
+     */
+    public void setOnEmptyRetryListener(OnEmptyContentRetryListener listener) {
+        this.mEmptyContentRetryListener = listener;
+    }
+
 
     public StateLayout(@NonNull Context context) {
         super(context);
@@ -163,31 +339,6 @@ public class StateLayout extends FrameLayout {
         }
     }
 
-    /**
-     * 添加状态布局
-     * @param state 状态
-     * @param layoutId 布局 id
-     */
-    private void addItemLayout(int state, @LayoutRes int layoutId){
-
-        ItemView itemView = new ItemView(state, layoutId);
-        mSavedItemViews.add(itemView);
-
-        ViewStub itemViewStub = new ViewStub(getContext());
-        itemViewStub.setLayoutResource(layoutId);
-        addView(itemViewStub);
-        stateLayoutItems.append(state, itemViewStub);
-    }
-
-    /**
-     * 添加自定义状态布局
-     * @param state 状态
-     * @param layoutId 布局 id
-     */
-    public void addCustomItemLayout(int state, @LayoutRes int layoutId){
-        addItemLayout(state, layoutId);
-    }
-
 
     @Override
     protected void onFinishInflate() {
@@ -197,6 +348,7 @@ public class StateLayout extends FrameLayout {
             if (mContentView == null) {
                 if (getChildCount() > 0) {
                     mContentView = getChildAt(0);
+                    mCurrentViewItems.append(STATE_CONTENT, mContentView);
                 }
             }
 
@@ -214,60 +366,7 @@ public class StateLayout extends FrameLayout {
             mHasInit = true;
         }
     }
-    
-    /**
-     * 改变状态
-     * @param state
-     */
-    public void changeState(int state){
 
-        if (mCurState == state) {
-            Log.d(TAG, "changeState() miss, current state already is " + state);
-            return;
-        }
-
-        hideAllItemViews();
-
-        // 如果已经子布局加载到当前的视图中
-        View itemView = mCurrentViewItems.get(state);
-        if (itemView != null) {
-            showItemView(state, itemView);
-            return;
-        }
-
-        // 获取缓存的 ViewStub 对象进行布局懒加载，实现只在需要时才加载布局
-        ViewStub itemViewStub = stateLayoutItems.get(state);
-        if(itemViewStub != null) {
-            // 当 ViewStub 被 inflate 后，getParent 返回值是 null
-            // 注意 ViewStub 只能被 inflate 一次（setVisibility 有同样效果），完成 inflate 后 ViewStub 会被移除，功成身退
-            if (itemViewStub.getParent() != null) {
-                itemView = itemViewStub.inflate();
-
-                switch (state) {
-                    case STATE_ERROR :
-                        initErrorListener(itemView);
-                        break;
-                    case STATE_EMPTY_CONTENT :
-                        initEmptyContentListener(itemView);
-                        break;
-                    default:break;
-                }
-
-                mCurrentViewItems.append(state, itemView);
-                showItemView(state, itemView);
-            }
-        } else {
-            // 查找恢复数据中是否包含该状态视图
-            for (ItemView saveItemView : mSavedItemViews) {
-                if (saveItemView != null && state == saveItemView.getState()) {
-                    addItemLayout(state, saveItemView.getLayoutId());
-                    changeState(state);
-                    return;
-                }
-            }
-            Log.e(TAG, "StateLayout change to state " + state + ", but can't match the correct layout.");
-        }
-    }
 
     private void initErrorListener(View itemView) {
         if (itemView == null) {
@@ -305,30 +404,6 @@ public class StateLayout extends FrameLayout {
         }
     }
 
-    public void showEmptyContent(){
-        changeState(STATE_EMPTY_CONTENT);
-    }
-
-    public void showError(){
-        changeState(STATE_ERROR);
-    }
-
-    public void showLoading(){
-        changeState(STATE_LOADING);
-    }
-
-    public void showContent(){
-
-        if (mCurState == STATE_CONTENT) {
-            Log.d(TAG, "showContent() miss, current layout already is ContentLayout");
-            return;
-        }
-
-        hideAllItemViews();
-
-        showItemView(STATE_CONTENT, mContentView);
-    }
-
     private void showItemView(int state, View itemView) {
         if (itemView != null) {
             if (mEnableContentAnim) {
@@ -344,61 +419,18 @@ public class StateLayout extends FrameLayout {
     }
 
     /**
-     * 获取视图
-     * @param state 状态
-     * @return view
-     */
-    public @Nullable View getCurrentItemView(int state) {
-        return mCurrentViewItems.get(state);
-    }
-
-    /**
-     * 获取当前状态
-     */
-    public int getCurrentState() {
-        return mCurState;
-    }
-
-    /**
-     * 是否开启布局切换动画
-     */
-    public void enableAnim(boolean enable) {
-        this.mEnableContentAnim = enable;
-    }
-
-    /**
-     * 设置错误重试监听
-     * @param listener 重试监听
-     */
-    public void setOnErrorRetryListener(OnErrorRetryListener listener) {
-        this.mErrorRetryListener = listener;
-    }
-
-    /**
-     * 设置空内容重试监听
-     * @param listener 重试监听
-     */
-    public void setOnEmptyRetryListener(OnEmptyContentRetryListener listener) {
-        this.mEmptyContentRetryListener = listener;
-    }
-
-    /**
      * 隐藏所有子布局
      */
     protected void hideAllItemViews() {
-        if (mContentView != null && mContentView.getVisibility() == VISIBLE) {
-            mContentView.setVisibility(GONE);
-        }
-
         for (int index = 0; index < mCurrentViewItems.size(); index++) {
             View view = mCurrentViewItems.valueAt(index);
-            view.setVisibility(GONE);
+            if (view != null) {
+                view.setVisibility(GONE);
+            }
         }
     }
 
-
-    /*********************************** 状态恢复 *************************************/
-
+    /******************** 视图状态保存和恢复 *******************/
     @Override
     protected Parcelable onSaveInstanceState() {
         SavedViewState state = new SavedViewState(super.onSaveInstanceState());
@@ -468,6 +500,9 @@ public class StateLayout extends FrameLayout {
 
     }
 
+    /**
+     * ItemView 用于把子视图的 state 和 layoutId 的匹配关系变成可序列化缓存的对象
+     */
     static class ItemView implements Parcelable {
         private final int state;
         private final int layoutId;
@@ -512,19 +547,5 @@ public class StateLayout extends FrameLayout {
                 return new ItemView[size];
             }
         };
-    }
-
-    /**
-     * 错误重试监听器
-     */
-    public interface OnErrorRetryListener {
-        void onErrorRetry();
-    }
-
-    /**
-     * 内容为空重试
-     */
-    public interface OnEmptyContentRetryListener {
-        void onEmptyContentRetry();
     }
 }
