@@ -34,7 +34,7 @@ compile 'gdut.bsx:stateLayout:1.1.0'
           android:layout_height="match_parent"
           app:enableAnim="true"
           app:emptyContentLayoutResId="@layout/layout_empty"
-          app:errorLayoutResId="@layout/layout_error
+          app:errorLayoutResId="@layout/layout_error"
           app:loadingLayoutResId="@layout/layout_loading">
           
      <include layout="@layout/layout_content"/>
@@ -90,14 +90,14 @@ public void showContent()
           android:layout_width="match_parent"
           android:layout_height="match_parent"
           app:emptyContentLayoutResId="@layout/layout_empty"
-          app:errorLayoutResId="@layout/layout_error
+          app:errorLayoutResId="@layout/layout_error"
           app:loadingLayoutResId="@layout/layout_loading">
 </gdut.bsx.view.StateLayout>
 ```
 
 > 内置的状态可以根据自身实际业务合理配置，未指定布局的状态不会进行加载，所以不会影响原本视图性能。
 
-```
+```java
 /**
  * change to empty content state.
  */
