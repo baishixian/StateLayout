@@ -1,7 +1,14 @@
 # StateLayout
- StateLayout supports different states to match different layouts for Android.
+
+StateLayout 支持添加自定义的状态布局。
+
+> 通常为了解决数据页面加载时的四个状态：Loading（加载中）、Error （加载错误）、Empty（无内容）、Content（显示内容）的切换 ，把这种根据业务状态动态切换视图内容的组件称为状态布局，StateLayout 在此基础上加入了自定义业务状态的支持。
+
+StateLayout supports different states to match different layouts for Android.
 
 ![Sample](https://github.com/baishixian/StateLayout/blob/master/Sample.gif)
+
+掘金：[支持自定义的状态布局 StateLayout](https://juejin.im/post/5a372a4951882527a13d9575)
 
 ## Add dependencies
 
